@@ -1,0 +1,243 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "/home/sergio/Downloads/VectorStack/array_stack.h"
+#include "/home/sergio/Downloads/VectorQueue/array_queue.h"
+
+using namespace structures;
+using namespace std;
+
+int main() {
+
+    char xmlfilename[100];
+
+    //std::cin >> xmlfilename;  // entrada
+    
+    /*
+     
+       COLOQUE SEU CODIGO AQUI
+    
+    */
+    ArrayStack<string> p; // Criação da pilha
+    ArrayQueue<string> fila; // Criação da fila
+
+    int height = 0;
+    int width = 0;
+
+    string line_0;
+    ifstream file_0;
+    file_0.open("/home/sergio/Downloads/datasets/dataset01.xml");
+    if (file_0.is_open()) {
+        while (getline(file_0, line_0)) {
+            int k = 0;
+            while (line[k] != 0) {
+                if (p.top() == "height") {
+                    string h;
+                    while (line[k] != 60) {
+                        string char_h (1, line[k]);
+                        h.append(char_h);
+                        k++;
+                    }
+                    height = stoi(h);
+                }
+                if (p.top() == "width") {
+                    string w;
+                    while (line[k] != 60) {
+                        string char_w (1, line[k]);
+                        w.append(char_w);
+                        k++;
+                    }
+                    width = stoi(w);
+                }
+            }
+        }
+    }
+
+    int R[height][width]; // Criação da matrix R
+
+    int E[height][width]; // Criação da matrix E
+
+    bool pegar_nome = false;
+    string nome;
+
+    string AB = "00";
+    
+    int rotulo = 0;
+
+    int I = -1;
+
+    bool mat_E = false;
+
+    string line;
+    ifstream file_1;
+    file_1.open("/home/sergio/Downloads/datasets/dataset01.xml");
+    if (file_1.is_open()) {
+        while (getline(file_1, line)) {
+            int i = 0;
+            while (line[i] != 0) {
+                if (pegar_nome) {
+                    while (line[i] != 60) {
+                        string n (1, line[i]); // Obtenção de cada caractere
+                        nome.append(n); // "Push back" no vetor "string nome" de cada caractere, concatenando-os
+                    }
+                    nome.append("");
+                    pegar_nome = false;
+                }
+                if (mat_E && line[i] != 60) {
+                    E[I][i] = line[i]; // Preenchimento da matrix E
+                }
+                if (p.top() == "height") {
+                    string h;
+                    while (line[i] != 60) {
+                        string char_h (1, line[i]);
+                        h.append(char_h);
+                        i++;
+                    }
+                    height = stoi(h);
+                }
+                if (p.top() == "width") {
+                    string w;
+                    while (line[i] != 60) {
+                        string char_w (1, line[i]);
+                        w.append(char_w);
+                        i++;
+                    }
+                    width = stoi(w);
+                }
+                if (line[i] == 60) {
+                   mat_E = false;
+                   if (I + 1) {
+                    rotulo = 1;
+                    for (int a = 0; a < height; a++) {
+                        for (int b = 0; b < width; b++) {
+                            if (E[a][b] == 49) {
+                                string A = to_string(a);
+                                string B = to_string(b);
+                                AB[0] = A[0];
+                                AB[1] = B[0];
+                                fila.enqueue(AB);
+                                R[a][b] = rotulo;
+                            }
+                            while (!fila.empty()) {
+                                fila.dequeue();
+                                if (a - 1 > -1) {
+                                    if (E[a - 1][b] == 49 && R[a - 1][b] == 0) {
+                                        string A = to_string(a - 1);
+                                        string B = to_string(b);
+                                        AB[0] = A[0];
+                                        AB[1] = B[0];
+                                        fila.enqueue(AB);
+                                        R[a - 1][b] = rotulo;
+                                    }
+                                }
+                                if (a + 1 < height) {
+                                    if (E[a + 1][b] == 49 && R[a + 1][b] == 0) {
+                                        string A = to_string(a + 1);
+                                        string B = to_string(b);
+                                        AB[0] = A[0];
+                                        AB[1] = B[0];
+                                        fila.enqueue(AB);
+                                        R[a + 1][b] = rotulo;
+                                    }
+                                }
+                                if (b - 1 > -1) {
+                                    if (E[a][b - 1] == 49 && R[a][b - 1] == 0) {
+                                        string A = to_string(a);
+                                        string B = to_string(b - 1);
+                                        AB[0] = A[0];
+                                        AB[1] = B[0];
+                                        fila.enqueue(AB);
+                                        R[a][b - 1] = rotulo;
+                                    }
+                                }
+                                if (b + 1 < width) {
+                                    if (E[a][b + 1] == 49 && R[a][b + 1] == 0) {
+                                        string A = to_string(a);
+                                        string B = to_string(b + 1);
+                                        AB[0] = A[0];
+                                        AB[1] = B[0];
+                                        fila.enqueue(AB);
+                                        R[a][b + 1] = rotulo;
+                                    }
+                                }
+                            }
+                            rotulo++;                        
+                        }
+                    }
+                    I = -1;
+                   }
+                   i++;
+                   string s;
+                   bool desempilha = false;
+                   if (line[i] == 47) {
+                        desempilha = true;
+                        i++;
+                    }
+                   while (line[i] != 62) {
+                    string z (1, line[i]); // Obtenção de cada caractere
+                    s.append(z); // "Push back" no vetor "string s" de cada caractere, concatenando-os
+                    i++;
+                   }
+                   printf("\n");
+                   //cout << s << endl;
+                   if (desempilha) {
+                    if (!p.empty()) {
+                        if (p.top() == s) {
+                            p.pop(); // Remove "string" na pilha
+                        } else {
+                            //cout << "Marcação [" << p.top() << "] deveria ter sido fechada antes" << endl;
+                            cout << "error" << endl;
+                            throw out_of_range("Só é possível remover o elemento do topo da pilha\n");
+                        }
+                    } else {
+                        cout << "error" << endl;
+                        throw out_of_range("Pilha vazia");
+                    }
+                    } else {
+                        p.push(s); // Coloca "string" na pilha
+                        if (s == "name") {
+                            pegar_nome = true;
+                            nome = "";
+                        }
+                        if (s == "data") {
+                            mat_E = true;
+                            // Preenchimento da matrix R com ZEROS
+                            for (int a = 0; a < height; a++) {
+                                for (int b = 0; b < width; b++) {
+                                    R[a][b] = 0;                        
+                                }
+                            }
+                        }
+                    }
+                    size_t SZ = p.size();
+                    //cout << SZ << endl;
+                }
+                i++; // Próxima coluna do arquivo
+            }
+            if (rotulo) {
+                cout << nome << rotulo << endl;
+                rotulo = 0; 
+            }
+            if (mat_E) {
+                I++; // Próxima linha do arquivo
+            }
+        }
+        bool final_exception = false;
+        while (!p.empty()) {
+            final_exception = true;
+            //cout << "Marcação [" << p.top() << "] não foi fechada" << endl;
+            cout << "error" << endl;
+            p.pop();
+        }
+        if (final_exception) {
+            throw out_of_range("Pilha não estava vazia ao final da leitura do arquivo");
+        }
+    } else {
+        printf("Unable to open file\n");
+    }
+    file_1.close();
+
+    //std::cout << xmlfilename << std::endl;  // esta linha deve ser removida
+
+    return 0;
+}
